@@ -5,7 +5,6 @@ import h5py
 # File path to H1 data
 h1_file = "data/H-H1_LOSC_4_V1-1126256640-4096.hdf5"
 
-
 try:
     strain = TimeSeries.read(h1_file, path="strain/Strain", format='hdf5.gwosc')
 except Exception as e:
