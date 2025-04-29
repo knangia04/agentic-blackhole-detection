@@ -1,22 +1,33 @@
 from gwpy.timeseries import TimeSeries
 from matplotlib import pyplot as plt
+import h5py
 
-# File path to the L1 strain data HDF5 file
-filename = "data/data/L-L1_LOSC_4_V1-1126256640-4096.hdf5"
+# File path to H1 data
+h1_file = "data/H-H1_LOSC_4_V1-1126256640-4096.hdf5"
 
-# Load strain data from the file
-l1_strain = TimeSeries.read(filename, channel="L1:LOSC-STRAIN")
 
-# Trim around the GW150914 event (GPS 1126259462.4)
-# Show 4 seconds of data centered on the event
-l1_trimmed = l1_strain.crop(1126259460, 1126259464)
+try:
+    strain = TimeSeries.read(h1_file, path="strain/Strain", format='hdf5.gwosc')
+except Exception as e:
+    print(f"First attempt failed: {e}")
+    # Alternative approach using h5py directly if the above fails
+    try:
+        with h5py.File(h1_file, 'r') as f:
+            data = f['strain/Strain'][()]
+            t0 = f['strain/Strain'].attrs['GPSstart']
+            dt = f['strain/Strain'].attrs['dt']
+            strain = TimeSeries(data, t0=t0, dt=dt, name='H1 Strain')
+    except Exception as e2:
+        print(f"Second attempt failed: {e2}")
+        # Try with default format
+        strain = TimeSeries.read(h1_file, path="strain/Strain")
 
-# Plot the time series
-plot = l1_trimmed.plot()
-ax = plot.gca()
-ax.set_title("L1 Strain Data – GW150914")
-ax.set_xlabel("Time (s)")
-ax.set_ylabel("Strain")
+# Focus on 4 seconds around GW150914 (GPS 1126259462)
+strain_trimmed = strain.crop(1126259460, 1126259464)
 
-plt.tight_layout()
+# Plot
+plot = strain_trimmed.plot()
+plot.gca().set_title("H1 Strain – GW150914")
+plot.gca().set_xlabel("Time (s)")
+plot.gca().set_ylabel("Strain")
 plt.show()
