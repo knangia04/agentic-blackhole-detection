@@ -1,32 +1,35 @@
-from gwpy.timeseries import TimeSeries
+# visualize.py
+"""
+Quick–look plot of the GW150914 signal.
+
+1. Downloads a 256 s Hanford (H1) strain segment centred on the event.
+2. Crops to ±2 s for visual clarity.
+3. Plots strain versus time.
+
+Edit the USER PARAMS block to change GPS time, detector, or crop width.
+"""
+
 from matplotlib import pyplot as plt
-import h5py
+from agents.fetch_validate import download
 
-# File path to H1 data
-h1_file = "data/H-H1_LOSC_4_V1-1126256640-4096.hdf5"
+# ───────── USER PARAMS ───────── #
+gps_event = 1126259462          # GW150914
+detector = "H1"                 # use "L1", "V1", etc. for others
+half_window = 128               # total segment = 2 × this
+crop_width = 2                  # seconds plotted around the event
+# ─────────────────────────────── #
 
-try:
-    strain = TimeSeries.read(h1_file, path="strain/Strain", format='hdf5.gwosc')
-except Exception as e:
-    print(f"First attempt failed: {e}")
-    # Alternative approach using h5py directly if the above fails
-    try:
-        with h5py.File(h1_file, 'r') as f:
-            data = f['strain/Strain'][()]
-            t0 = f['strain/Strain'].attrs['GPSstart']
-            dt = f['strain/Strain'].attrs['dt']
-            strain = TimeSeries(data, t0=t0, dt=dt, name='H1 Strain')
-    except Exception as e2:
-        print(f"Second attempt failed: {e2}")
-        # Try with default format
-        strain = TimeSeries.read(h1_file, path="strain/Strain")
+# 1. Fetch & validate strain data
+strain = download(detector, gps_event, window=half_window)
 
-# Focus on 4 seconds around GW150914 (GPS 1126259462)
-strain_trimmed = strain.crop(1126259460, 1126259464)
+# 2. Zoom to small segment around event
+strain_zoom = strain.crop(gps_event - crop_width, gps_event + crop_width)
 
-# Plot
-plot = strain_trimmed.plot()
-plot.gca().set_title("H1 Strain – GW150914")
-plot.gca().set_xlabel("Time (s)")
-plot.gca().set_ylabel("Strain")
+# 3. Plot
+plot = strain_zoom.plot()
+ax = plot.gca()
+ax.set_title(f"{detector} strain – GW150914")
+ax.set_xlabel("Time (s)")
+ax.set_ylabel("Strain")
+
 plt.show()
