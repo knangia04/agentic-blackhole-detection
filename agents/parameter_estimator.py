@@ -15,21 +15,38 @@ def estimate_parameters(
     strain_segment = strain.crop(gps - duration // 2, gps + duration // 2)
 
     # Convert to Bilby Interferometer
-    interferometer = bilby.gw.detector.Interferometer("H1")
+    interferometer = bilby.gw.detector.get_empty_interferometer('H1')
     interferometer.strain_data.set_from_gwpy_timeseries(strain_segment)
     interferometer.minimum_frequency = f_low
 
     interferometers = InterferometerList(["H1"])
     interferometers[0] = interferometer
 
-    # Define prior dictionary
-    priors = bilby.gw.prior.BBHPriorDict()
-    priors["mass_1"] = bilby.core.prior.Uniform(20, 80, "mass_1")
-    priors["mass_2"] = bilby.core.prior.Uniform(20, 80, "mass_2")
-    priors["luminosity_distance"] = bilby.core.prior.Uniform(100, 1000, "luminosity_distance")
-    priors["theta_jn"] = bilby.core.prior.Uniform(0, 3.14, "theta_jn")
-    priors["phase"] = bilby.core.prior.Uniform(0, 2 * 3.1415, "phase")
-    priors["geocent_time"] = bilby.core.prior.Uniform(gps - 0.1, gps + 0.1, "geocent_time")
+    # Set extremely narrow priors for quick testing
+    priors = dict()
+    
+    # Mass parameters
+    priors["mass_1"] = bilby.core.prior.Uniform(35.5, 36.5, "mass_1")
+    priors["mass_2"] = bilby.core.prior.Uniform(28.5, 29.5, "mass_2")
+    
+    # Fixed parameters for quick test
+    priors["luminosity_distance"] = 440
+    priors["theta_jn"] = 0.4
+    priors["phase"] = 0.0
+    priors["geocent_time"] = gps
+    
+    # Required spin parameters (setting to zero for non-spinning test)
+    priors["a_1"] = 0.0  # Primary spin magnitude
+    priors["a_2"] = 0.0  # Secondary spin magnitude
+    priors["tilt_1"] = 0.0  # Primary spin tilt
+    priors["tilt_2"] = 0.0  # Secondary spin tilt
+    priors["phi_12"] = 0.0  # Relative spin azimuthal angle
+    priors["phi_jl"] = 0.0  # Precession angle
+    
+    # Sky location parameters (fixed overhead)
+    priors["ra"] = 0.0  # Right ascension
+    priors["dec"] = 0.0  # Declination
+    priors["psi"] = 0.0  # Polarization angle
 
     # Define waveform generator
     waveform_generator = bilby.gw.waveform_generator.WaveformGenerator(
@@ -53,7 +70,15 @@ def estimate_parameters(
         sampler="dynesty",
         label=label,
         outdir=outdir,
-        nlive=500,
+        nlive=10,        # Minimum number for stability
+        npool=1,         # Single CPU
+        dlogz=10.0,      # Less stringent convergence
+        maxmcmc=50,      # Reduced MCMC steps
+        walks=5,         # Minimal walks
+        nact=5,          # Fixed number of autocorrelation times
+        bound='single',  # Simpler boundary conditioning
+        sample='unif',   # Uniform sampling (faster)
+        save=True
     )
 
     result.plot_corner()

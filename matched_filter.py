@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 def run_matched_filter(strain, sample_rate):
     # 1. Generate template waveform (GW150914-like)
     hp, _ = get_td_waveform(approximant="SEOBNRv4",  # accurate BBH model
-                            mass1=36,
-                            mass2=29,
-                            delta_t=1.0 / sample_rate,
-                            f_lower=30)
+                           mass1=36,
+                           mass2=29,
+                           delta_t=1.0 / sample_rate,
+                           f_lower=30)
 
-    # Resize template to match strain segment
-    hp = hp.crop(0.2, 0.2)  # removes startup & wraparound artifacts
+    # Resize template to match strain length
+    template_length = len(strain)
+    hp.resize(template_length)
 
     # 2. Estimate PSD from the strain
     psd = strain.psd(4)  # 4-second FFTs
@@ -24,7 +25,13 @@ def run_matched_filter(strain, sample_rate):
     snr = matched_filter(hp, strain, psd=psd, low_frequency_cutoff=30)
 
     # 4. Trim edges and find peak
-    snr = snr.crop(4, 4)
+    try:
+        snr = snr.crop(4, 4)  # Try to crop 4 seconds from each end
+    except ValueError:
+        # If we don't have enough data, crop less
+        crop_time = min(4, len(snr) / snr.sample_rate / 4)
+        snr = snr.crop(crop_time, crop_time)
+
     peak = abs(snr).numpy().argmax()
     snr_peak = abs(snr[peak])
     peak_time = snr.sample_times[peak]

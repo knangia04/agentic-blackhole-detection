@@ -22,8 +22,8 @@ from pycbc.types import TimeSeries as PyCBCTimeSeries
 # ───────── USER PARAMS ───────── #
 gps_event = 1126259462          # GW150914
 detector = "H1"                 # use "L1", "V1", etc. for others
-half_window = 128               # total segment = 2 × this
-crop_width = 2                  # seconds plotted around the event
+half_window = 256               # total segment = 2 × this
+crop_width = 16                 # seconds plotted around the event
 # ─────────────────────────────── #
 
 
