@@ -23,7 +23,7 @@ from pycbc.types import TimeSeries as PyCBCTimeSeries
 gps_event = 1126259462          # GW150914
 detector = "H1"                 # use "L1", "V1", etc. for others
 half_window = 256               # total segment = 2 × this
-crop_width = 16                 # seconds plotted around the event
+crop_width = 2                 # seconds plotted around the event
 # ─────────────────────────────── #
 
 
@@ -144,20 +144,17 @@ def perform_processed_analysis(strain, gps_time, crop_width, detector_name):
     - crop_width: Width to crop around event in seconds
     - detector_name: Name of the detector
     """
-    # Preprocess full strain data
-    strain_clean = preprocess(strain)
-    
-    # Crop processed data
-    strain_zoom = crop_data(strain_clean, gps_time, crop_width)
-    
-    # Plot processed data
-    plot_processed_strain(strain_zoom, detector_name)
-    
-    # Convert to PyCBC format
-    strain_pycbc = convert_gwpy_to_pycbc(strain_zoom)
-    
+    # Preprocess returns already cropped, whitened signal
+    strain_clean = preprocess(strain, gps_event=gps_time, crop_width=crop_width)
+
+    # Plot preprocessed signal
+    plot_processed_strain(strain_clean, detector_name)
+
+    # Convert for PyCBC
+    strain_pycbc = convert_gwpy_to_pycbc(strain_clean)
+
     # Run matched filtering
-    run_matched_filter(strain_pycbc, strain_zoom.sample_rate.value)
+    run_matched_filter(strain_pycbc, strain_clean.sample_rate.value)
 
 
 def main():
