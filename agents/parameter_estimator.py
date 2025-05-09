@@ -70,8 +70,8 @@ def estimate_parameters(
         sampler="dynesty",
         label=label,
         outdir=outdir,
-        nlive=10,        # Minimum number for stability
-        npool=1,         # Single CPU
+        nlive=5,        # Minimum number for stability
+        npool=2,         # Single CPU
         dlogz=10.0,      # Less stringent convergence
         maxmcmc=50,      # Reduced MCMC steps
         walks=5,         # Minimal walks
