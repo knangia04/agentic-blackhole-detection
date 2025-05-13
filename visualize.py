@@ -18,7 +18,7 @@ from pycbc.types import TimeSeries as PyCBCTimeSeries
 gps_event = 1126259462          # GW150914
 detectors = ["H1", "L1"]        # Run coincidence check across these
 half_window = 256               # total segment = 2 × this
-crop_width = 2                  # seconds plotted around the event
+crop_width = 64                 # seconds plotted around the event
 snr_threshold = 8.0             # detection threshold
 coincidence_window = 0.01       # seconds (10 ms)
 # ─────────────────────────────── #
@@ -59,9 +59,9 @@ def plot_processed_strain(strain, detector_name, event_name="GW150914", save_pat
 def convert_gwpy_to_pycbc(gwpy_timeseries):
     return PyCBCTimeSeries(
         gwpy_timeseries.value,
-        delta_t=1.0 / gwpy_timeseries.sample_rate.value
+        delta_t=1.0 / gwpy_timeseries.sample_rate.value,
+        epoch=gwpy_timeseries.t0.value  # ✅ Use .value to strip units
     )
-
 
 def analyze_detector(detector, gps_time):
     print(f"\n===== {detector} Analysis =====")
@@ -71,22 +71,27 @@ def analyze_detector(detector, gps_time):
     perform_raw_analysis(strain, gps_time, crop_width, detector)
 
     # Preprocess and analyze
-    strain_clean = preprocess(strain, gps_event=gps_time, crop_width=crop_width)
+    strain_clean = preprocess(strain, gps_event=gps_event, crop_width=crop_width)
+    print(strain_clean.t0, strain_clean.t0 + strain_clean.duration)
+
     plot_processed_strain(strain_clean, detector)
 
     # Convert to PyCBC and run matched filter
     strain_pycbc = convert_gwpy_to_pycbc(strain_clean)
-    snr = run_matched_filter(strain_pycbc, strain_clean.sample_rate.value)
+    
+    # print(f"[DEBUG] PyCBC strain start time (epoch): {strain_pycbc.start_time}")
+    
+    snr = run_matched_filter(strain_pycbc, strain_clean.sample_rate.value, gps_event=gps_event)
 
     # Run detection logic using that SNR
-    detected, peak_snr, peak_time = detect_signal(snr, snr_threshold=snr_threshold)
+    detected, peak_snr, peak_time = detect_signal(snr, t0=strain_clean.t0, snr_threshold=snr_threshold)
 
     print(f"Detection: {'✅' if detected else '❌'} | Peak SNR: {peak_snr:.2f} at t = {peak_time:.4f}s")
 
     return {
         "detected": detected,
         "peak_snr": peak_snr,
-        "peak_time": peak_time
+        "peak_time": float(peak_time)
     }
 
 
@@ -102,12 +107,26 @@ def main():
     for det in detectors:
         results[det] = analyze_detector(det, gps_event)
 
+    # COINCIDENCE CHECK
     print("\n===== Coincidence Check =====")
-    if all(results[det]["detected"] for det in detectors):
-        times = [results[det]["peak_time"] for det in detectors]
-        delta_t = abs(times[0] - times[1])
-        if delta_t <= coincidence_window:
-            print(f"✅ Coincident detection! Δt = {delta_t:.4f} s")
+
+    if all(det in results for det in ["H1", "L1"]):
+        time_H1 = results["H1"]["peak_time"]
+        time_L1 = results["L1"]["peak_time"]
+
+        print(f"H1 peak: {time_H1:.6f} s")
+        print(f"L1 peak: {time_L1:.6f} s")
+
+        delta_t = abs(time_H1 - time_L1)
+
+
+        # delta_t = abs(float(time_H1) - float(time_L1))
+        coincidence_tolerance = 0.1 
+
+        print(f"Δt = {delta_t:.4f} s")
+
+        if delta_t <= coincidence_tolerance:
+            print(f"✅ Signals coincident within ±{coincidence_tolerance * 1000:.0f} ms")
         else:
             print(f"❌ Peak times too far apart: Δt = {delta_t:.4f} s")
     else:

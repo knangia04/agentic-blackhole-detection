@@ -28,7 +28,9 @@ snr_dict = {}
 for det in detectors:
     print(f"\n--- Processing {det} ---")
     strain = download(det, gps_event, window=half_window)
-    strain_clean = preprocess(strain)
+    strain_clean = preprocess(strain, gps_event=gps_event, crop_width=crop_width)
+    # print(strain_clean.t0, strain_clean.t1)
+    print(strain_clean.t0, strain_clean.t0 + strain_clean.duration)
     strain_zoom = strain_clean.crop(gps_event - crop_width, gps_event + crop_width)
 
     strain_zoom_dict[det] = strain_zoom
