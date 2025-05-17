@@ -1,7 +1,11 @@
 from langchain.agents import AgentExecutor
 from langchain_core.runnables import RunnableConfig
 from .agent import detection_agent, detection_tools
+import os
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
 
 def run_orchestration(user_query: str):
     """
@@ -13,18 +17,24 @@ def run_orchestration(user_query: str):
     Returns:
         str: Agent's final answer or reasoning trace.
     """
-    executor = AgentExecutor(
+    # Create the agent executor without the agent parameter
+    executor = AgentExecutor.from_agent_and_tools(
         agent=detection_agent,
         tools=detection_tools,
-        verbose=True,  # Logs each step of agent thought process
+        verbose=True,
         return_intermediate_steps=True
     )
 
-    config = RunnableConfig(tags=["agent", "gw-detection"])
+    # Run the executor with the user's query
+    try:
+        # For LangChain >=0.0.267
+        result = executor.invoke({"input": user_query})
+    except TypeError:
+        # Fallback for older LangChain versions
+        result = executor.run(user_query)
+        return result
 
-    result = executor.invoke({"input": user_query}, config=config)
-
-    final_output = result.get("output")
+    final_output = result.get("output", "No output generated")
     print("\n[Agent Response]\n", final_output)
     return final_output
 
