@@ -40,13 +40,13 @@ def _check_sample_rate(ts: TimeSeries, expected: Iterable[float]) -> None:
 
 def _check_quality_flag(ts: TimeSeries, flag: str) -> None:
     if not hasattr(ts, "quality"):
-        print("⚠️  No quality flags available; skipping veto check.")
+        print("No quality flags available; skipping veto check.")
         return
 
     q = ts.quality
     key = flag.lower()
     if key not in q:
-        print(f"⚠️  Flag '{flag}' not found; skipping veto check.")
+        print(f"Flag '{flag}' not found; skipping veto check.")
         return
 
     if not q[key].active.contains((ts.t0, ts.t0 + ts.duration)):

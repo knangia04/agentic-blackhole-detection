@@ -66,21 +66,13 @@ def convert_gwpy_to_pycbc(gwpy_timeseries):
 def analyze_detector(detector, gps_time):
     print(f"\n===== {detector} Analysis =====")
 
-    # Fetch and visualize raw data
-    strain = fetch_data(detector, gps_time, half_window)
-    perform_raw_analysis(strain, gps_time, crop_width, detector)
-
-    # Preprocess and analyze
+    strain = fetch_data(detector, gps_event, half_window)
     strain_clean = preprocess(strain, gps_event=gps_event, crop_width=crop_width)
-    print(strain_clean.t0, strain_clean.t0 + strain_clean.duration)
 
-    plot_processed_strain(strain_clean, detector)
-
-    # Convert to PyCBC and run matched filter
+    print(strain_clean.span.start, strain_clean.span.end)
     strain_pycbc = convert_gwpy_to_pycbc(strain_clean)
-    
-    # print(f"[DEBUG] PyCBC strain start time (epoch): {strain_pycbc.start_time}")
-    
+
+    # Run matched filter and keep full SNR
     snr = run_matched_filter(strain_pycbc, strain_clean.sample_rate.value, gps_event=gps_event)
 
     # Run detection logic using that SNR
@@ -91,7 +83,8 @@ def analyze_detector(detector, gps_time):
     return {
         "detected": detected,
         "peak_snr": peak_snr,
-        "peak_time": float(peak_time)
+        "peak_time": float(peak_time),
+        "snr_series": snr 
     }
 
 
@@ -131,6 +124,11 @@ def main():
             print(f"❌ Peak times too far apart: Δt = {delta_t:.4f} s")
     else:
         print("❌ One or both detectors failed to detect signal")
+    
+    from report_generator import generate_pdf_report
+
+    generate_pdf_report(results, gps_event, delta_t)
+
 
 
 if __name__ == "__main__":
