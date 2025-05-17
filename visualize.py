@@ -78,7 +78,7 @@ def analyze_detector(detector, gps_time):
     # Run detection logic using that SNR
     detected, peak_snr, peak_time = detect_signal(snr, t0=strain_clean.t0, snr_threshold=snr_threshold)
 
-    print(f"Detection: {'✅' if detected else '❌'} | Peak SNR: {peak_snr:.2f} at t = {peak_time:.4f}s")
+    print(f"Detection: {'Yes' if detected else 'No'} | Peak SNR: {peak_snr:.2f} at t = {peak_time:.4f}s")
 
     return {
         "detected": detected,

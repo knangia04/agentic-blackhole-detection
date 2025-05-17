@@ -62,9 +62,10 @@ class ReportInput(BaseModel):
 
 
 @tool("generate_report")
-def report_tool(input: ReportInput):
-    """Generate final PDF report after coincidence check."""
+def report_tool(gps_event: str):
+    """Generate a PDF report given a GPS event time."""
+    gps_time = int(gps_event.strip())
     from visualize import run_pipeline
-    results, delta_t = run_pipeline(input.gps_event)
-    generate_pdf_report(results, input.gps_event, delta_t)
-    return "Generated PDF report in output/report.pdf"
+    results, delta_t = run_pipeline(gps_time)
+    generate_pdf_report(results, gps_time, delta_t)
+    return "PDF report generated."
