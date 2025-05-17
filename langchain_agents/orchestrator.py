@@ -1,8 +1,8 @@
 from langchain.agents import AgentExecutor
-from langchain_core.runnables import RunnableConfig
-from .agent import detection_agent, detection_tools
+from langchain_core.messages import HumanMessage
 import os
 from dotenv import load_dotenv
+from .agent import detection_agent, detection_tools, llm
 
 # Load environment variables
 load_dotenv()
@@ -17,24 +17,30 @@ def run_orchestration(user_query: str):
     Returns:
         str: Agent's final answer or reasoning trace.
     """
-    # Create the agent executor without the agent parameter
-    executor = AgentExecutor.from_agent_and_tools(
+    # Create the agent executor with the correct setup for newer LangChain versions
+    executor = AgentExecutor(
         agent=detection_agent,
         tools=detection_tools,
         verbose=True,
-        return_intermediate_steps=True
+        handle_parsing_errors=True
     )
 
-    # Run the executor with the user's query
+    # Run the executor with the user's query using the newer invoke method
     try:
-        # For LangChain >=0.0.267
         result = executor.invoke({"input": user_query})
-    except TypeError:
-        # Fallback for older LangChain versions
-        result = executor.run(user_query)
-        return result
+        final_output = result.get("output", "No output generated")
+    except Exception as e:
+        print(f"Error running agent: {str(e)}")
+        # Fallback if the agent execution fails
+        response = llm.invoke([HumanMessage(content=f"""
+        I need to analyze gravitational wave data related to the following query:
+        
+        {user_query}
+        
+        Due to technical limitations, I'll provide a direct answer without using tools:
+        """)]) 
+        final_output = response.content
 
-    final_output = result.get("output", "No output generated")
     print("\n[Agent Response]\n", final_output)
     return final_output
 
