@@ -22,7 +22,9 @@ def run_orchestration(user_query: str):
         agent=detection_agent,
         tools=detection_tools,
         verbose=True,
-        handle_parsing_errors=True
+        handle_parsing_errors=True,
+        max_iterations=20,
+        max_execution_time=120
     )
 
     # Run the executor with the user's query using the newer invoke method

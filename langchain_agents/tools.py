@@ -56,16 +56,34 @@ def analyze_tool(input: AnalyzeInput):
     return f"{input.detector}: Peak SNR = {peak_snr:.2f} at t = {peak_time:.4f} (Detected: {detected})"
 
 
+from visualize import run_pipeline
+from report_generator import generate_pdf_report
+from pydantic import BaseModel
+
 class ReportInput(BaseModel):
     gps_event: int
-    delta_t: float = 0.05
 
+import json
+from langchain.tools import tool
 
 @tool("generate_report")
-def report_tool(gps_event: str):
-    """Generate a PDF report given a GPS event time."""
-    gps_time = int(gps_event.strip())
+def generate_report_tool(input: str):
+    """
+    Run the full pipeline and generate a PDF report.
+    Accepts JSON string: {"gps_event": int, "delta_t": float (optional)}.
+    """
+    try:
+        parsed = json.loads(input)
+        gps_event = int(parsed["gps_event"])
+        delta_t = float(parsed.get("delta_t", 0.05))
+    except Exception as e:
+        return f"❌ Failed to parse input: {str(e)}"
+
     from visualize import run_pipeline
-    results, delta_t = run_pipeline(gps_time)
-    generate_pdf_report(results, gps_time, delta_t)
-    return "PDF report generated."
+    from report_generator import generate_pdf_report
+
+    results, delta_t = run_pipeline(gps_event)
+    generate_pdf_report(results, gps_event, delta_t, output_file=f"output/{gps_event}_report.pdf")
+    return f"✅ Report generated at output/{gps_event}_report.pdf"
+
+

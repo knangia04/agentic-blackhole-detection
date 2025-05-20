@@ -127,8 +127,19 @@ def main():
     
     from report_generator import generate_pdf_report
 
-    generate_pdf_report(results, gps_event, delta_t)
+    generate_pdf_report(results, gps_event, delta_t, output_file=f"output/{gps_event}_report.pdf")
 
+def run_pipeline(gps_event, detectors=["H1", "L1"], crop_width=64, snr_threshold=8.0):
+    results = {}
+    for det in detectors:
+        results[det] = analyze_detector(det, gps_event)
+
+    if all(det in results for det in ["H1", "L1"]):
+        delta_t = abs(results["H1"]["peak_time"] - results["L1"]["peak_time"])
+    else:
+        delta_t = None
+
+    return results, delta_t
 
 
 if __name__ == "__main__":

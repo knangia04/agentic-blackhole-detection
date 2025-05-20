@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 from langchain.agents import Tool, create_react_agent
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain.agents import AgentExecutor
+from langchain.agents import AgentExecutor, AgentType
 
-from .tools import fetch_data_tool, preprocess_tool, analyze_tool, report_tool
+from .tools import fetch_data_tool, preprocess_tool, analyze_tool, generate_report_tool
 
 # Load environment variables
 load_dotenv()
@@ -34,14 +34,18 @@ TOOLS = [
     ),
     Tool(
         name="Generate Report",
-        func=report_tool,
-        description="Run the full pipeline and generate PDF report."
-    ),
+        func=generate_report_tool,
+        description=(
+            "Run the full pipeline and generate a PDF report. "
+            "Provide input as a dictionary: {\"gps_event\": int, \"delta_t\": float (optional)}. "
+            "Example: {\"gps_event\": 1126259462}"
+        )
+    )
 ]
 
 # Setup OpenRouter LLM client with the updated API
 llm = ChatOpenAI(
-    model="meta-llama/llama-4-maverick:free",
+    model="mistralai/mistral-small-3.1-24b-instruct:free",
     base_url="https://openrouter.ai/api/v1",
     api_key=OPENROUTER_API_KEY,
     temperature=0,
@@ -89,6 +93,10 @@ detection_tools = TOOLS
 # Interactive run
 if __name__ == "__main__":
     query = "Generate a gravitational wave report for GPS event 1126259462 using detectors H1 and L1"
-    agent_executor = AgentExecutor(agent=detection_agent, tools=TOOLS, verbose=True)
+    agent_executor = AgentExecutor.from_agent_and_tools(
+        agent=detection_agent,
+        tools=TOOLS,
+        verbose=True
+    )
     result = agent_executor.invoke({"input": query})
     print(result["output"])
