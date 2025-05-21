@@ -32,7 +32,7 @@ Users can interact via a natural language or parameter-driven **Streamlit interf
 ## Methodology
 
 ### Event-Aware Processing
-Each known GW event is mapped to astrophysical metadata:
+Each known GW event is mapped to astrophysical metadata. For the sake of simplicity, we have only used these variables for our metadata:
 - `mass1`, `mass2` in M☉
 - `distance` in Mpc
 - `gps_event` timestamp
