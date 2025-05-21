@@ -47,4 +47,4 @@ def generate_pdf_report(results: dict, gps_event: int, delta_t=None, output_file
                 pdf.savefig(fig)
                 plt.close(fig)
 
-    print(f"[✓] PDF report saved to {output_file}")
+    print(f"\n[✓] PDF report saved to {output_file}")

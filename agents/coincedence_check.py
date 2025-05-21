@@ -9,8 +9,8 @@ Cross-detector coincidence validation for GW150914 with visualization.
 """
 
 from agents.fetch_validate import download
-from preprocess import preprocess
-from matched_filter import run_matched_filter
+from agents.preprocess import preprocess
+from agents.matched_filter import run_matched_filter
 from pycbc.types import TimeSeries
 import matplotlib.pyplot as plt
 
@@ -66,7 +66,7 @@ plt.ylabel("Strain (whitened, filtered)")
 plt.legend()
 plt.grid()
 plt.tight_layout()
-plt.show()
+# plt.show()
 
 # 2. Overlaid SNR plots
 plt.figure(figsize=(10, 4))
@@ -79,7 +79,7 @@ plt.ylabel("SNR")
 plt.legend()
 plt.grid()
 plt.tight_layout()
-plt.show()
+# plt.show()
 
 # 3. Print timing info
 print("\n--- Coincidence Summary ---")
@@ -107,7 +107,7 @@ def plot_spectrogram(strain, detector, gps_event, crop_width):
     ax.set_ylabel("Frequency (Hz)")
     ax.set_yscale('log')
     ax.grid(True)
-    plt.show()
+    # plt.show()
 
 for det in detectors:
     print(f"\n--- Spectrogram for {det} ---")

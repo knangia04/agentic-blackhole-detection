@@ -1,4 +1,4 @@
-def run_matched_filter(strain, sample_rate, gps_event=None, search_window=0.2):
+def run_matched_filter(strain, sample_rate, mass1, mass2, distance, gps_event=None, search_window=0.5):
     from pycbc.waveform import get_td_waveform
     from pycbc.filter import matched_filter
     from pycbc.psd import interpolate, inverse_spectrum_truncation
@@ -8,14 +8,15 @@ def run_matched_filter(strain, sample_rate, gps_event=None, search_window=0.2):
     # 1. Generate template waveform
     hp, _ = get_td_waveform(
         approximant="SEOBNRv4",
-        mass1=36,
-        mass2=29,
+        mass1=mass1,
+        mass2=mass2,
         delta_t=1.0 / sample_rate,
-        f_lower=30
+        f_lower=30,
+        distance=distance
     )
     # Crop template only if long enough
-    crop_margin = min(0.1, hp.duration / 5)
-    hp = hp.crop(crop_margin, crop_margin)
+    # crop_margin = min(0.1, hp.duration / 5)
+    hp = hp.crop(0.075, 0.075)
 
     # hp = hp.crop(0.2, 0.2)
 
@@ -83,7 +84,7 @@ def run_matched_filter(strain, sample_rate, gps_event=None, search_window=0.2):
     plt.ylabel("SNR")
     plt.grid()
     plt.legend()
-    plt.show()
+    # plt.show()
 
     return snr
 

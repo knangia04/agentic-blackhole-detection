@@ -22,7 +22,7 @@ def download(
             detector.upper(), start, end, cache=cache, include_quality=True
         )
     except TypeError:
-        print("⚠️  include_quality not supported — skipping DQ flags.")
+        # print("⚠️  include_quality not supported — skipping DQ flags.")
         ts = TimeSeries.fetch_open_data(detector.upper(), start, end, cache=cache)
 
     _check_sample_rate(ts, (4096.0, 16384.0))
@@ -40,13 +40,13 @@ def _check_sample_rate(ts: TimeSeries, expected: Iterable[float]) -> None:
 
 def _check_quality_flag(ts: TimeSeries, flag: str) -> None:
     if not hasattr(ts, "quality"):
-        print("No quality flags available; skipping veto check.")
+        # print("No quality flags available; skipping veto check.")
         return
 
     q = ts.quality
     key = flag.lower()
     if key not in q:
-        print(f"Flag '{flag}' not found; skipping veto check.")
+        # print(f"Flag '{flag}' not found; skipping veto check.")
         return
 
     if not q[key].active.contains((ts.t0, ts.t0 + ts.duration)):

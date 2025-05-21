@@ -1,5 +1,5 @@
 from pycbc.types import TimeSeries as PyCBCTimeSeries
-from matched_filter import run_matched_filter
+from agents.matched_filter import run_matched_filter
 
 
 def detect_signal(snr, t0, snr_threshold=8.0):
