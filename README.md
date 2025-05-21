@@ -1,4 +1,3 @@
-
 # Agentic Black Hole Detection
 
 **Team Members:**  
@@ -21,7 +20,7 @@ Users can interact via a natural language or parameter-driven **Streamlit interf
 
 ## Architecture Overview
 
-- **LLM Orchestrator:** Routes analysis through LangChain tools based on natural prompts (e.g., “Generate a report for GW150914”).
+- **LLM Orchestrator:** Using Mistral Small 3.1 24B LLM model, the orchestrator routes analysis through LangChain tools based on natural prompts (e.g., “Generate a report for GW150914”).
 - **LangChain Tools:** Implemented for data fetching, preprocessing, analysis, and report generation.
 - **Event Metadata Resolver:** Maps event names like `GW170817` to mass, distance, and GPS time.
 - **Streamlit UI:** Interactive frontend supporting both free-form and manual input.
@@ -78,53 +77,6 @@ The UI persistently tracks PDF generation and allows download without state loss
 
 ---
 
-## Literature Survey Highlights
-
-- **Shi et al. (2023)** introduce CBS-GPT, a transformer-based model for synthesizing gravitational waveforms from compact binary systems. Its high accuracy and generalization make it ideal for augmenting waveform datasets in detection pipelines.  
-  [https://arxiv.org/abs/2310.2017](https://arxiv.org/abs/2310.2017)
-- **Chatterjee et al. (2024)** adapt OpenAI's Whisper model for gravitational wave detection, demonstrating that audio-pretrained transformers can classify astrophysical signals and reject noise artifacts. This supports our use of transfer learning in the detection stack.  
-  [https://arxiv.org/abs/2412.20789](https://arxiv.org/abs/2412.20789)
-- **Ruiz (2023)** explores CNNs, both human-designed and GPT-generated, for GW signal classification. The findings support generative model use in automated architecture design.  
-  [https://diposit.ub.edu/dspace/handle/2445/201012](https://diposit.ub.edu/dspace/handle/2445/201012)
-- **Marx et al. (2024)** present a real-time machine learning pipeline for detecting compact binary coalescences, replacing traditional filtering with neural networks to reduce latency. Their approach informs our system's real-time design.  
-  [https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010)
-- **Zhao et al. (2023)** review AI applications in GW research, highlighting advances in signal detection, parameter estimation, and waveform modeling. Their synthesis contextualizes our approach within broader AI developments.  
-  [https://arxiv.org/abs/2311.15585](https://arxiv.org/abs/2311.15585)
-
----
-
-## Data Sources
-
-- **GWTC Catalog:**  
-  Event metadata and PE samples — [gwosc.org/eventapi/html/GWTC](https://gwosc.org/eventapi/html/GWTC)
-
-- **GWOSC Strain Data (O1–O3):**  
-  Raw LIGO/Virgo data for analysis — [gwosc.org/data](https://gwosc.org/data)
-
----
-
-## Appendix A: Subagent Design
-
-| Subagent           | Role                                                                 |
-|--------------------|----------------------------------------------------------------------|
-| `fetch_data_tool`  | Downloads raw H1/L1 strain data using GWpy                          |
-| `preprocess_tool`  | Applies whitening, filtering, and cropping                          |
-| `analyze_tool`     | Performs matched filtering and signal detection                     |
-| `generate_report_tool` | Generates plots and PDF summary                                |
-| `resolve_event_metadata` | Extracts parameters from known GW event names               |
-
-Each tool conforms to the LangChain tool interface for seamless LLM invocation.
-
----
-
-## Technologies Used
-
-- `Python`, `GWpy`, `PyCBC`
-- `LangChain`, `OpenAI`, `Pydantic`
-- `Matplotlib`, `NumPy`, `Streamlit`
-
----
-
 ## Example Prompt
 
 > “Generate a comparative PDF report on GW150914 and GW170817, including waveform shape and SNR.”
@@ -135,3 +87,89 @@ LLM automatically:
 - Applies matched filter
 - Evaluates signal significance
 - Outputs downloadable reports
+
+---
+
+## How to Run the Agent
+
+To run the full agentic detection system and interactive interface:
+
+### 1. Install Dependencies
+
+Clone the repository and install the required Python packages:
+
+```bash
+git clone https://github.com/SidharthAnand04/agentic-blackhole-detection.git
+cd agentic-blackhole-detection
+pip install -r requirements.txt
+```
+
+### 2. Launch the Streamlit Interface
+
+Start the web interface:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+This will open a local app at [http://localhost:8501](http://localhost:8501).
+
+### 3. Use the Interface
+
+Choose one of the two modes:
+- **Prompt Mode:** Ask natural language queries like  
+  > _"Generate a report on GW150914 and GW151226."_
+
+- **Manual Mode:** Select a known event (e.g., `GW170817`) and optionally override mass/distance.
+
+### 4. Download Reports
+
+After analysis, PDFs are presented for download. You can:
+- Download reports individually
+- Generate multiple reports in one run
+- Persist UI state across downloads
+
+---
+
+## Literature Survey Highlights
+
+- **Shi et al. (2023)** introduce CBS-GPT, a transformer-based model for synthesizing gravitational waveforms from compact binary systems.  
+  [https://arxiv.org/abs/2310.2017](https://arxiv.org/abs/2310.2017)
+- **Chatterjee et al. (2024)** adapt OpenAI's Whisper model for gravitational wave detection.  
+  [https://arxiv.org/abs/2412.20789](https://arxiv.org/abs/2412.20789)
+- **Ruiz (2023)** explores CNNs for GW signal classification.  
+  [https://diposit.ub.edu/dspace/handle/2445/201012](https://diposit.ub.edu/dspace/handle/2445/201012)
+- **Marx et al. (2024)** present a real-time ML pipeline for compact binary coalescence detection.  
+  [https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010)
+- **Zhao et al. (2023)** review AI in GW research.  
+  [https://arxiv.org/abs/2311.15585](https://arxiv.org/abs/2311.15585)
+
+---
+
+## Data Sources
+
+- **GWTC Catalog:**  
+  [https://gwosc.org/eventapi/html/GWTC](https://gwosc.org/eventapi/html/GWTC)
+
+- **GWOSC Strain Data (O1–O3):**  
+  [https://gwosc.org/data](https://gwosc.org/data)
+
+---
+
+## Appendix A: Subagent Design
+
+| Subagent               | Role                                                         |
+|------------------------|--------------------------------------------------------------|
+| `fetch_data_tool`      | Downloads raw H1/L1 strain data using GWpy                  |
+| `preprocess_tool`      | Applies whitening, filtering, and cropping                  |
+| `analyze_tool`         | Performs matched filtering and signal detection             |
+| `generate_report_tool` | Generates plots and PDF summary                             |
+| `resolve_event_metadata` | Extracts parameters from known GW event names           |
+
+---
+
+## Technologies Used
+
+- `Python`, `GWpy`, `PyCBC`
+- `LangChain`, `OpenAI`, `Pydantic`
+- `Matplotlib`, `NumPy`, `Streamlit`
