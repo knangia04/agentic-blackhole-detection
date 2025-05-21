@@ -2,8 +2,7 @@
 # Agentic Black Hole Detection
 
 **Team Members:**  
-Krish Nangia (`knang2`)
-Sidharth Anand (`sanand12`)  
+Krish Nangia (`knang2`) and Sidharth Anand (`sanand12`)  
 
 **Course:** ECE 498 Section BH3  
 **Submission Date:** May 21, 2025  
