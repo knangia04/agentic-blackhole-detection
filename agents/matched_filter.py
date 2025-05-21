@@ -16,7 +16,7 @@ def run_matched_filter(strain, sample_rate, mass1, mass2, distance, gps_event=No
     )
     # Crop template only if long enough
     # crop_margin = min(0.1, hp.duration / 5)
-    hp = hp.crop(0.075, 0.075)
+    hp = hp.crop(0.1, 0.1)
 
     # hp = hp.crop(0.2, 0.2)
 

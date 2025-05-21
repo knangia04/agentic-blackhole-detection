@@ -1,108 +1,135 @@
+
 # Agentic Black Hole Detection
 
 **Team Members:**  
-Sidharth Anand (Sanand12)  
-Krish Nangia (Knang2)
+Krish Nangia (`knang2`)
+Sidharth Anand (`sanand12`)  
 
-**Date:** 4/22/2025  
 **Course:** ECE 498 Section BH3  
-**Topic:** 4: Agentic Black Hole Detection  
-**Repository:** [https://github.com/SidharthAnand04/agentic-blackhole-detection](https://github.com/SidharthAnand04/agentic-blackhole-detection)
+**Submission Date:** May 21, 2025  
+**Project Topic:** Agentic Gravitational Wave Detection  
+**Repository:** [github.com/SidharthAnand04/agentic-blackhole-detection](https://github.com/SidharthAnand04/agentic-blackhole-detection)
 
-## Project Overview 
-This project develops an autonomous, agent-based system for detecting black hole mergers from gravitational wave data. Modular subagents handle preprocessing, detection, and parameter estimation, orchestrated by a large language model for adaptive workflow control. Leveraging GWTC and GWOSC datasets, the system integrates matched filtering and neural networks to enable scalable, real-time gravitational wave analysis.
+---
 
-## Methodology 
-We use raw strain data from the GWOSC Observing Runs (O1–O3), applying preprocessing steps such as calibration, noise subtraction, and filtering via GWpy and PyCBC. Cleaned data is transformed into spectrograms and wavelets for analysis.
+## Project Overview
 
-Signal detection combines matched filtering with CNN models trained on simulated mergers. Both modeled and unmodeled techniques (e.g., Coherent WaveBurst) identify candidate events based on signal-to-noise ratio.
+We present a fully autonomous, agentic system for black hole merger detection using real gravitational wave data. A Large Language Model (LLM) orchestrates tool-augmented subagents for data fetching, preprocessing, matched filtering, signal detection, and PDF report generation.
 
-Parameter estimation uses Bilby with MCMC or Nested Sampling to infer mass, spin, and distance. Triangulation generates sky localization maps.
+Users can interact via a natural language or parameter-driven **Streamlit interface**, receiving detailed scientific outputs with waveform plots, signal-to-noise ratios (SNR), and detector coincidence analysis. Our system supports comparative event queries and real-time PDF export.
 
-Each task, data preprocessing, detection, validation, estimation, and reporting, is assigned to a modular subagent. An LLM-based Orchestrator Agent (via LangChain or AutoGen) sequences these tasks and handles reasoning.
+---
 
-Outputs include plots, parameter summaries, and localization maps, delivered through a Streamlit or Gradio interface. The system runs in a Dockerized HPC environment for scalability and reproducibility.
+## Architecture Overview
 
-## Literature Survey
-- **Shi et al. (2023)** introduce CBS-GPT, a transformer-based model for synthesizing gravitational waveforms from compact binary systems. Its high accuracy and generalization make it ideal for augmenting waveform datasets in detection pipelines.  
-  [https://arxiv.org/abs/2310.2017](https://arxiv.org/abs/2310.2017)
+- **LLM Orchestrator:** Routes analysis through LangChain tools based on natural prompts (e.g., “Generate a report for GW150914”).
+- **LangChain Tools:** Implemented for data fetching, preprocessing, analysis, and report generation.
+- **Event Metadata Resolver:** Maps event names like `GW170817` to mass, distance, and GPS time.
+- **Streamlit UI:** Interactive frontend supporting both free-form and manual input.
+- **Outputs:** Automatically generated scientific PDF reports with matched filter plots and summary statistics.
 
-- **Chatterjee et al. (2024)** adapt OpenAI's Whisper model for gravitational wave detection, demonstrating that audio-pretrained transformers can classify astrophysical signals and reject noise artifacts. This supports our use of transfer learning in the detection stack.  
-  [https://arxiv.org/abs/2412.20789](https://arxiv.org/abs/2412.20789)
+---
 
-- **Ruiz (2023)** explores CNNs, both human-designed and GPT-generated, for GW signal classification. The findings support generative model use in automated architecture design.  
-  [https://diposit.ub.edu/dspace/handle/2445/201012](https://diposit.ub.edu/dspace/handle/2445/201012)
+## Methodology
 
-- **Marx et al. (2024)** present a real-time machine learning pipeline for detecting compact binary coalescences, replacing traditional filtering with neural networks to reduce latency. Their approach informs our system's real-time design.  
-  [https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010)
+### Event-Aware Processing
+Each known GW event is mapped to astrophysical metadata:
+- `mass1`, `mass2` in M☉
+- `distance` in Mpc
+- `gps_event` timestamp
 
-- **Zhao et al. (2023)** review AI applications in GW research, highlighting advances in signal detection, parameter estimation, and waveform modeling. Their synthesis contextualizes our approach within broader AI developments.  
-  [https://arxiv.org/abs/2311.15585](https://arxiv.org/abs/2311.15585)
+This metadata is injected automatically unless overridden by user input.
+
+### Detection Pipeline
+1. **Remote Fetch Data** using `GWpy` for detectors like H1 and L1.
+2. **Preprocess:** Whitening, bandpass filtering, and cropping.
+3. **Matched Filtering:** Using `PyCBC`, generate template waveforms and compute SNR time series.
+4. **Signal Detection:** Evaluate peak SNR values and timing for each detector.
+5. **Coincidence Analysis:** Compare detection times across detectors.
+6. **Report Generation:** Create annotated plots and export to PDF.
+
+---
+
+## LangChain-Based Agent Workflow
+
+```mermaid
+flowchart TD
+    A[User Prompt] --> B[LLM Agent]
+    B --> C{{LangChain Tool Call}}
+    C --> D[fetch_data_tool]
+    C --> E[preprocess_tool]
+    C --> F[analyze_tool]
+    C --> G[generate_report_tool]
+    G --> H[PDF Output]
+```
+
+---
+
+## Streamlit Interface
+
+The system can be used via:
+
+- **Prompt Mode**:  
+  _"Generate a comparative report on GW150914 and GW170814."_
+
+- **Manual Mode**:  
+  Select event name and detector configuration, override mass and distance.
+
+The UI persistently tracks PDF generation and allows download without state loss.
+
+---
+
+## Literature Survey Highlights
+
+- **Shi et al. (2023):** Transformer-based synthesis of GW signals (CBS-GPT).
+- **Chatterjee et al. (2024):** Audio transformers like Whisper for GW signal classification.
+- **Ruiz (2023):** GPT-assisted CNN design for signal classification.
+- **Marx et al. (2024):** Real-time ML for CBC detection, minimizing latency.
+- **Zhao et al. (2023):** AI in GW astronomy: detection, estimation, modeling.
+
+Full references available [here](#literature-survey).
+
+---
 
 ## Data Sources
 
-### Gravitational-Wave Transient Catalog (GWTC)
-The GWTC provides detailed data on gravitational wave events detected by LIGO, Virgo, and KAGRA. It includes event metadata, parameter estimation samples, and sky localization maps, making it ideal for analyzing confirmed black hole mergers. The catalog is continuously updated with data from multiple observing runs.  
-[https://gwosc.org/eventapi/html/GWTC/](https://gwosc.org/eventapi/html/GWTC/)
+- **GWTC Catalog:**  
+  Event metadata and PE samples — [gwosc.org/eventapi/html/GWTC](https://gwosc.org/eventapi/html/GWTC)
 
-### GWOSC Observing Run Data (O1, O2, O3)
-This dataset contains raw and processed strain data recorded during LIGO and Virgo's observational runs. It includes quality flags, hardware injection signals, and full time-series data, enabling end-to-end signal processing and validation of detection pipelines. The dataset is ideal for training and evaluating machine learning models on real detector noise and events.  
-[https://gwosc.org/data/](https://gwosc.org/data/)
+- **GWOSC Strain Data (O1–O3):**  
+  Raw LIGO/Virgo data for analysis — [gwosc.org/data](https://gwosc.org/data)
 
-## Appendix A. Agent Architecture
+---
 
-### Agentic Architecture for Gravitational Wave Detection
+## Appendix A: Subagent Design
 
-#### 1. Introduction
-This document outlines a technical and practical approach for designing an agent-based system for detecting black hole mergers through gravitational wave (GW) data. It integrates raw GW data processing, detection algorithms, and large language model (LLM) based orchestration into a cohesive autonomous pipeline.
+| Subagent           | Role                                                                 |
+|--------------------|----------------------------------------------------------------------|
+| `fetch_data_tool`  | Downloads raw H1/L1 strain data using GWpy                          |
+| `preprocess_tool`  | Applies whitening, filtering, and cropping                          |
+| `analyze_tool`     | Performs matched filtering and signal detection                     |
+| `generate_report_tool` | Generates plots and PDF summary                                |
+| `resolve_event_metadata` | Extracts parameters from known GW event names               |
 
-#### 2. Gravitational Wave Detection Pipeline
+Each tool conforms to the LangChain tool interface for seamless LLM invocation.
 
-##### 2.1 Data Acquisition
-- Collect raw strain data from detectors like LIGO, Virgo, or KAGRA.
-- Use high-frequency sampled data (typically 16 kHz).
-- Data includes substantial noise sources: seismic, thermal, quantum.
+---
 
-##### 2.2 Preprocessing
-- Calibration of raw data into meaningful strain data.
-- Apply noise subtraction techniques and bandpass filters.
-- Use quality flags to exclude noisy data segments.
-- Generate spectrograms and apply wavelet transforms.
+## Technologies Used
 
-##### 2.3 Signal Detection
-- Apply matched filtering with template banks of theoretical waveforms.
-- Use ML/CNN models trained on simulated signals.
-- Evaluate signal-to-noise ratio (SNR) and significance.
-- Use unmodeled detection methods (e.g., Coherent WaveBurst).
+- `Python`, `GWpy`, `PyCBC`
+- `LangChain`, `OpenAI`, `Pydantic`
+- `Matplotlib`, `NumPy`, `Streamlit`
 
-##### 2.4 Parameter Estimation
-- Estimate parameters (mass, spin, distance) via Bayesian inference.
-- Use MCMC or Nested Sampling algorithms.
-- Perform sky localization with triangulation and probability maps.
+---
 
-##### 2.5 Post-Processing and Visualization
-- Run consistency checks and null tests.
-- Generate strain vs. time plots, spectrograms, and sky localization maps.
-- Use tools such as Matplotlib, GWsky, and Bilby for analysis.
+## Example Prompt
 
-#### 3. Agent-Based System with LLM Integration
-- Utilize LLMs (e.g., GPT, Claude, LLaMA) to orchestrate modules.
-- Design modular subagents: DataPreprocessor, SignalDetector, EventValidator, ParameterEstimator, ReportGenerator.
-- Use LangChain or AutoGen for implementation.
+> “Generate a comparative PDF report on GW150914 and GW170817, including waveform shape and SNR.”
 
-#### 4. System Architecture
-User Input → Orchestrator Agent → DataPreprocessor → SignalDetector → EventValidator → ParameterEstimator → ReportGenerator → User Output
-
-#### 5. Tools and Frameworks
-- GWpy, PyCBC, Bilby, Matplotlib for data analysis.
-- LangChain, AutoGen, CrewAI for orchestration.
-- HPC/Docker environments for execution.
-- Streamlit/Gradio for user interface.
-
-#### 6. Example Workflow
-1. User submits LIGO segment for analysis.
-2. DataPreprocessor cleans and filters the signal.
-3. SignalDetector identifies potential events.
-4. EventValidator filters out false positives.
-5. ParameterEstimator calculates physical parameters.
-6. ReportGenerator outputs visuals and summaries.
+LLM automatically:
+- Resolves event metadata
+- Fetches strain data from detectors
+- Applies matched filter
+- Evaluates signal significance
+- Outputs downloadable reports

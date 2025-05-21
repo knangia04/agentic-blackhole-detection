@@ -11,6 +11,7 @@ from agents.matched_filter import run_matched_filter
 from agents.signal_detector import detect_signal
 from reports.report_generator import generate_pdf_report
 from reports.visualize import run_pipeline
+from agents.gw_metadata import resolve_event_metadata
 
 # INPUT MODELS
 class FetchInput(BaseModel):
@@ -90,11 +91,25 @@ def analyze_tool(input: Union[AnalyzeInput, str, dict]):
     if isinstance(input, dict):
         if "gps_time" in input and "gps_event" not in input:
             input["gps_event"] = input.pop("gps_time")
-        input = AnalyzeInput(**input)
+        provided_fields = set(input.keys())
+        parsed = AnalyzeInput(**input)
+        mass1 = parsed.mass1
 
-    results, _ = run_pipeline(input.gps_event, input.mass1, input.mass2, input.distance, detectors=[input.detector])
-    det_result = results[input.detector]
-    return f"\n{input.detector}: Peak SNR = {det_result['peak_snr']:.2f} at t = {det_result['peak_time']:.4f} (Detected: {det_result['detected']})\n"
+    mass2 = parsed.mass2
+    distance = parsed.distance
+    if not {"mass1", "mass2", "distance"}.issubset(provided_fields):
+        metadata = resolve_event_metadata(str(parsed.gps_event))
+        if metadata:
+            mass1 = metadata["mass1"]
+            mass2 = metadata["mass2"]
+            distance = metadata["distance"]
+            # print(f"[Metadata Injected] {gps_event}: m1={mass1}, m2={mass2}, d={distance}")
+        else:
+            print(f"[Warning] No metadata for {parsed.gps_event}. Using defaults.")
+
+    results, _ = run_pipeline(parsed.gps_event, mass1, mass2, distance, detectors=[parsed.detector])
+    det_result = results[parsed.detector]
+    return f"\n{parsed.detector}: Peak SNR = {det_result['peak_snr']:.2f} at t = {det_result['peak_time']:.4f} (Detected: {det_result['detected']})\n"
 
 
 def generate_report_tool(input: Union[str, dict]):
@@ -112,25 +127,41 @@ def generate_report_tool(input: Union[str, dict]):
             input_cleaned = input.split("#")[0].strip()
             input = json.loads(input_cleaned)
         except json.JSONDecodeError as e:
-            raise ValueError(f"❌ Invalid JSON input passed to tool: {input}\n{e}")
+            raise ValueError(f"Invalid JSON input passed to tool: {input}\n{e}")
 
     if isinstance(input, dict):
         if "gps_time" in input and "gps_event" not in input:
             input["gps_event"] = input.pop("gps_time")
-        input = ReportInput(**input)  # 🧠 Pydantic model
 
-    # 🧠 Pull from validated input
-    gps_events = input.gps_event if isinstance(input.gps_event, list) else [input.gps_event]
-    mass1 = input.mass1
-    mass2 = input.mass2
-    distance = input.distance
+        # Capture what the LLM actually sent
+        provided_fields = set(input.keys())
+
+        # Then parse via Pydantic
+        parsed = ReportInput(**input)
+
+    gps_events = parsed.gps_event if isinstance(parsed.gps_event, list) else [parsed.gps_event]
+
+    # Only fallback to metadata if not explicitly provided
+    mass1 = parsed.mass1
+    mass2 = parsed.mass2
+    distance = parsed.distance
 
     results_summary = []
 
     for gps_event in gps_events:
+        if not {"mass1", "mass2", "distance"}.issubset(provided_fields):
+            metadata = resolve_event_metadata(str(gps_event))
+            if metadata:
+                mass1 = metadata["mass1"]
+                mass2 = metadata["mass2"]
+                distance = metadata["distance"]
+                # print(f"[Metadata Injected] {gps_event}: m1={mass1}, m2={mass2}, d={distance}")
+            else:
+                print(f"[Warning] No metadata for {gps_event}. Using defaults.")
+
         results, delta_t = run_pipeline(gps_event, mass1, mass2, distance)
         output_path = f"output/{gps_event}_report.pdf"
         generate_pdf_report(results, gps_event, delta_t, output_file=output_path)
-        results_summary.append(f"📄 {gps_event}_report.pdf")
+        results_summary.append(f"{gps_event}_report.pdf")
 
     return f"\nReports generated: {', '.join(results_summary)}\n"
