@@ -4,7 +4,7 @@
 **Team Members:**  
 Krish Nangia (`knang2`) and Sidharth Anand (`sanand12`)  
 
-**Course:** ECE 498 Section BH3  
+**Course:** ECE 498 Section BH3 - LLM Reasoning for Engineering  
 **Submission Date:** May 21, 2025  
 **Project Topic:** Agentic Gravitational Wave Detection  
 **Repository:** [github.com/SidharthAnand04/agentic-blackhole-detection](https://github.com/SidharthAnand04/agentic-blackhole-detection)
