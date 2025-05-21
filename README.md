@@ -3,6 +3,7 @@
 
 **Team Members:**  
 Krish Nangia (`knang2`)
+
 Sidharth Anand (`sanand12`)  
 
 **Course:** ECE 498 Section BH3  
@@ -81,13 +82,16 @@ The UI persistently tracks PDF generation and allows download without state loss
 
 ## Literature Survey Highlights
 
-- **Shi et al. (2023):** Transformer-based synthesis of GW signals (CBS-GPT).
-- **Chatterjee et al. (2024):** Audio transformers like Whisper for GW signal classification.
-- **Ruiz (2023):** GPT-assisted CNN design for signal classification.
-- **Marx et al. (2024):** Real-time ML for CBC detection, minimizing latency.
-- **Zhao et al. (2023):** AI in GW astronomy: detection, estimation, modeling.
-
-Full references available [here](#literature-survey).
+- **Shi et al. (2023)** introduce CBS-GPT, a transformer-based model for synthesizing gravitational waveforms from compact binary systems. Its high accuracy and generalization make it ideal for augmenting waveform datasets in detection pipelines.  
+  [https://arxiv.org/abs/2310.2017](https://arxiv.org/abs/2310.2017)
+- **Chatterjee et al. (2024)** adapt OpenAI's Whisper model for gravitational wave detection, demonstrating that audio-pretrained transformers can classify astrophysical signals and reject noise artifacts. This supports our use of transfer learning in the detection stack.  
+  [https://arxiv.org/abs/2412.20789](https://arxiv.org/abs/2412.20789)
+- **Ruiz (2023)** explores CNNs, both human-designed and GPT-generated, for GW signal classification. The findings support generative model use in automated architecture design.  
+  [https://diposit.ub.edu/dspace/handle/2445/201012](https://diposit.ub.edu/dspace/handle/2445/201012)
+- **Marx et al. (2024)** present a real-time machine learning pipeline for detecting compact binary coalescences, replacing traditional filtering with neural networks to reduce latency. Their approach informs our system's real-time design.  
+  [https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.042010)
+- **Zhao et al. (2023)** review AI applications in GW research, highlighting advances in signal detection, parameter estimation, and waveform modeling. Their synthesis contextualizes our approach within broader AI developments.  
+  [https://arxiv.org/abs/2311.15585](https://arxiv.org/abs/2311.15585)
 
 ---
 
