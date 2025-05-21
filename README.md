@@ -3,7 +3,6 @@
 
 **Team Members:**  
 Krish Nangia (`knang2`)
-
 Sidharth Anand (`sanand12`)  
 
 **Course:** ECE 498 Section BH3  
