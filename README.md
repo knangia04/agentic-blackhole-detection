@@ -6,7 +6,7 @@ Krish Nangia (`knang2`) and Sidharth Anand (`sanand12`)
 **Course:** ECE 498 Section BH3 - LLM Reasoning for Engineering  
 **Submission Date:** May 21, 2025  
 **Project Topic:** Agentic Gravitational Wave Detection  
-**Repository:** [github.com/SidharthAnand04/agentic-blackhole-detection](https://github.com/SidharthAnand04/agentic-blackhole-detection)
+**Repository:** [github.com/knangia04/agentic-blackhole-detection](https://github.com/knangia/agentic-blackhole-detection)
 
 ---
 
@@ -99,7 +99,7 @@ To run the full agentic detection system and interactive interface:
 Clone the repository and install the required Python packages:
 
 ```bash
-git clone https://github.com/SidharthAnand04/agentic-blackhole-detection.git
+git clone https://github.com/knangia04/agentic-blackhole-detection.git
 cd agentic-blackhole-detection
 pip install -r requirements.txt
 ```
